@@ -11,7 +11,7 @@ export default function Home() {
       password: "",
     },
     onSubmit: ({ username, password }) => {
-      axios.post("http://localhost:3001/login", {username, password})
+      axios.post("http://localhost:3001/login", {username, password}).then(response => console.log(response.data))
     }
   });
 

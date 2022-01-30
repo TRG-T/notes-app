@@ -3,11 +3,11 @@ package main
 import (
 	"fmt"
 	"os"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"github.com/gin-contrib/cors"
 )
 
 type User struct {
@@ -15,7 +15,7 @@ type User struct {
 	Username            string
 	Password            string
 }
-var users []User
+var user User
 
 type LoginRequestBody struct {
 	Username string
@@ -39,11 +39,6 @@ func main() {
 	} else {
 		fmt.Println("Connected to database")
 	}
-	
-	db.Table("users").Find(&users)
-	for _, user := range users {
-		fmt.Println(user.Username, user.Password)
-	}
 
 	r := gin.Default()
 	r.Use(cors.Default())
@@ -55,6 +50,12 @@ func main() {
 		}
 
 		fmt.Println(requestBody.Username, requestBody.Password)
+		db.Table("users").Where("username = ?", requestBody.Username).First(&user)
+		if requestBody.Password != user.Password {
+			c.JSON(200, "Wrong password")
+		} else {
+			c.JSON(200, "Success")
+		}
 	})
 	r.Run("127.0.0.1:3001")
 	
