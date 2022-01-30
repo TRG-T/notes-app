@@ -1,17 +1,25 @@
-import Head from "next/head";
-import Image from "next/image";
 import styles from "../styles/Home.module.css";
 import axios from "axios"
 import { useFormik } from "formik";
+import Router from 'next/router';
+import { useContext } from "react";
+import { AuthContext } from "./_app";
 
 export default function Home() {
+  const Auth = useContext(AuthContext)
   const formik = useFormik({
     initialValues: {
       username: "",
       password: "",
     },
     onSubmit: ({ username, password }) => {
-      axios.post("http://localhost:3001/login", {username, password}).then(response => console.log(response.data))
+      axios.post("http://localhost:3001/login", {username, password}).then(response => { 
+        console.log(response.data)
+        if (response.data === "Success") {
+          Router.push("/home")
+          Auth.setAuth(true)
+        }
+      })
     }
   });
 
