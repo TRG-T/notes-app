@@ -50,8 +50,10 @@ func main() {
 		}
 
 		fmt.Println(requestBody.Username, requestBody.Password)
-		db.Table("users").Where("username = ?", requestBody.Username).First(&user)
-		if requestBody.Password != user.Password {
+		res := db.Table("users").Where("username = ?", requestBody.Username).First(&user)
+		if res.RowsAffected == 0 {
+			c.JSON(200, "User not found")
+		} else if requestBody.Password != user.Password {
 			c.JSON(200, "Wrong password")
 		} else {
 			c.JSON(200, "Success")
