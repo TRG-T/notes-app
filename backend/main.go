@@ -8,6 +8,7 @@ import (
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
@@ -50,12 +51,32 @@ func main() {
 		}
 
 		fmt.Println(requestBody.Username, requestBody.Password)
-		res := db.Table("users").Where("username = ?", requestBody.Username).First(&user)
-		if res.RowsAffected == 0 {
+		result := db.Table("users").Where("username = ?", requestBody.Username).First(&user)
+		if result.RowsAffected == 0 {
 			c.JSON(200, "User not found")
-		} else if requestBody.Password != user.Password {
+		} else if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(requestBody.Password)) != nil {
 			c.JSON(200, "Wrong password")
 		} else {
+			c.JSON(200, "Success")
+		}
+	})
+	r.POST("/register", func(c *gin.Context) {
+		var requestBody LoginRequestBody
+		err := c.BindJSON(&requestBody)
+		if err != nil {
+			fmt.Println("Something went wrong")
+		}
+
+		fmt.Println(requestBody.Username, requestBody.Password)
+		bytes, err := bcrypt.GenerateFromPassword([]byte(requestBody.Password), 14)
+		if err != nil {
+			fmt.Println("Something went wrong with hashing password")
+		}
+		userCheck := db.Table("users").Where("username = ?", requestBody.Username).First(&user)
+		if userCheck.RowsAffected == 1 {
+			c.JSON(200, "User with this name already exist")
+		} else {
+			db.Table("users").Create(&User { Username: requestBody.Username, Password: string(bytes) })
 			c.JSON(200, "Success")
 		}
 	})

@@ -1,12 +1,12 @@
 import styles from "../styles/Home.module.css";
 import axios from "axios"
+import Link from 'next/link'
 import { useFormik } from "formik";
 import Router from 'next/router';
-import Link from "next/link";
 import { useContext } from "react";
 import { AuthContext } from "./_app";
 
-export default function Login() {
+export default function Register() {
   const Auth = useContext(AuthContext)
   const formik = useFormik({
     initialValues: {
@@ -14,7 +14,7 @@ export default function Login() {
       password: "",
     },
     onSubmit: ({ username, password }) => {
-      axios.post("http://localhost:3001/login", {username, password}).then(response => { 
+      axios.post("http://localhost:3001/register", {username, password}).then(response => { 
         console.log(response.data)
         if (response.data === "Success") {
           Router.push("/home")
@@ -27,14 +27,14 @@ export default function Login() {
   return (
     <div className={styles.container}>
       <div className={styles.login}>
-        <h2>Login</h2>
+        <h2>Register</h2>
         <form onSubmit={formik.handleSubmit} className={styles.inputs}>
           <input id="username" name="username" placeholder="username" type="text" onChange={formik.handleChange} value={formik.values.username} />
           <input id="password" name="password" placeholder="password" type="password" onChange={formik.handleChange} value={formik.values.password} />
-          <button type="submit" className={styles.button}>Login</button>
+          <button type="submit" className={styles.button}>Register</button>
         </form>
         <p className={styles.register}>
-          Don&apos;t have an account? <Link href="/register">Register</Link>
+          Have an account? <Link href="/">Log in</Link>
         </p>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { useContext} from "react";
 import Router from "next/router";
+import Link from "next/link"
 import { AuthContext } from "./_app";
 
 const Home = () => {
@@ -9,8 +10,7 @@ const Home = () => {
         Router.back()
     }
     return (
-        <button onClick={() => { Auth.setAuth(false); Router.back() }}>Logout</button>
-       
+        <Link href="/" onClick={() => Auth.setAuth(false)}>Logout</Link>
     )
 }
 
