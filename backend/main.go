@@ -7,6 +7,7 @@ import (
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"github.com/gin-contrib/cors"
 )
 
 type User struct {
@@ -16,6 +17,11 @@ type User struct {
 }
 var users []User
 
+type LoginRequestBody struct {
+	Username string
+	Password string
+}
+
 
 func main() {
 	godotenv.Load(".env")
@@ -24,7 +30,7 @@ func main() {
 	dbPassword := os.Getenv("DB_PASSWORD")
 	dbName := os.Getenv("DB_NAME")
 	dbURI := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=5432", dbHost, dbUser, dbPassword, dbName)
-	
+
 	db, err := gorm.Open(postgres.Open(dbURI), &gorm.Config{})
 	db.AutoMigrate(&User{})
 
@@ -40,10 +46,15 @@ func main() {
 	}
 
 	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "ping",
-		})
+	r.Use(cors.Default())
+	r.POST("/login", func(c *gin.Context) {
+		var requestBody LoginRequestBody
+		err := c.BindJSON(&requestBody)
+		if err != nil {
+			fmt.Println("Something went wrong")
+		}
+
+		fmt.Println(requestBody.Username, requestBody.Password)
 	})
 	r.Run("127.0.0.1:3001")
 	
