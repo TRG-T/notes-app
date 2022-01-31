@@ -24,6 +24,7 @@ type Note struct {
 	Description			string
 	OwnerID				uint
 }
+var notes []Note
 
 type LoginRequestBody struct {
 	Username string
@@ -65,7 +66,6 @@ func main() {
 			fmt.Println("Something went wrong")
 		}
 
-		fmt.Println(requestBody.Username, requestBody.Password)
 		result := db.Table("users").Where("username = ?", requestBody.Username).First(&user)
 		if result.RowsAffected == 0 {
 			c.JSON(200, "User not found")
@@ -84,7 +84,6 @@ func main() {
 			fmt.Println("Something went wrong")
 		}
 
-		fmt.Println(requestBody.Username, requestBody.Password)
 		bytes, _ := bcrypt.GenerateFromPassword([]byte(requestBody.Password), 14)
 		checkUser := db.Table("users").Where("username = ?", requestBody.Username).First(&user)
 		if checkUser.RowsAffected == 1 {
@@ -105,6 +104,15 @@ func main() {
 		db.Table("users").Where("username = ?", requestBody.User).First(&user)
 		db.Table("notes").Create(&Note { Title: requestBody.Title, Description: requestBody.Description, OwnerID: user.ID })
 		c.JSON(200, "Success")
+	})
+
+	
+	r.GET("/get-notes", func(c *gin.Context) {
+		params := c.Request.URL.Query()
+
+		db.Table("users").Where("username = ?", params["user"]).First(&user)
+		db.Table("notes").Where("owner_id = ?", user.ID).Find(&notes)
+		c.JSON(200, notes)
 	})
 	r.Run("127.0.0.1:3001")
 	
