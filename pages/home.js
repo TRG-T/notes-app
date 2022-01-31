@@ -1,4 +1,4 @@
-import { useContext, useState} from "react";
+import { useContext, useEffect, useState} from "react";
 import styles from "../styles/Home.module.css"
 import Router from "next/router";
 import Link from "next/link"
@@ -9,6 +9,11 @@ import axios from "axios";
 const Home = () => {
     const Auth = useContext(AuthContext);
     const [addNote, setAddNote] = useState();
+    const [notes, setNotes] = useState();
+
+    useEffect(() => {
+        axios.get("http://localhost:3001/get-notes", { params: { user: Auth.user }}).then(response => console.log(response.data));
+    }, [Auth.user])
     if (Auth.auth === false ) {
         Router.back()
     }
