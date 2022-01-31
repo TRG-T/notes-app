@@ -68,12 +68,9 @@ func main() {
 		}
 
 		fmt.Println(requestBody.Username, requestBody.Password)
-		bytes, err := bcrypt.GenerateFromPassword([]byte(requestBody.Password), 14)
-		if err != nil {
-			fmt.Println("Something went wrong with hashing password")
-		}
-		userCheck := db.Table("users").Where("username = ?", requestBody.Username).First(&user)
-		if userCheck.RowsAffected == 1 {
+		bytes, _ := bcrypt.GenerateFromPassword([]byte(requestBody.Password), 14)
+		checkUser := db.Table("users").Where("username = ?", requestBody.Username).First(&user)
+		if checkUser.RowsAffected == 1 {
 			c.JSON(200, "User with this name already exist")
 		} else {
 			db.Table("users").Create(&User { Username: requestBody.Username, Password: string(bytes) })

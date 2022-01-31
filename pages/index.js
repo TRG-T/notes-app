@@ -1,4 +1,4 @@
-import styles from "../styles/Home.module.css";
+import styles from "../styles/Login.module.css";
 import axios from "axios"
 import { useFormik } from "formik";
 import Router from 'next/router';
@@ -19,6 +19,7 @@ export default function Login() {
         if (response.data === "Success") {
           Router.push("/home")
           Auth.setAuth(true)
+          Auth.setUser(username)
         }
       })
     }
