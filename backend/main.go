@@ -18,9 +18,22 @@ type User struct {
 }
 var user User
 
+type Note struct {
+	gorm.Model
+	Title				string
+	Description			string
+	OwnerID				uint
+}
+
 type LoginRequestBody struct {
 	Username string
 	Password string
+}
+
+type NoteRequestBody struct {
+	Title string
+	Description string
+	User string
 }
 
 
@@ -33,7 +46,7 @@ func main() {
 	dbURI := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=5432", dbHost, dbUser, dbPassword, dbName)
 
 	db, err := gorm.Open(postgres.Open(dbURI), &gorm.Config{})
-	db.AutoMigrate(&User{})
+	db.AutoMigrate(&User{}, &Note{})
 
 	if err != nil {
 		fmt.Println("Connecting to database failed")
@@ -43,6 +56,8 @@ func main() {
 
 	r := gin.Default()
 	r.Use(cors.Default())
+
+
 	r.POST("/login", func(c *gin.Context) {
 		var requestBody LoginRequestBody
 		err := c.BindJSON(&requestBody)
@@ -60,6 +75,8 @@ func main() {
 			c.JSON(200, "Success")
 		}
 	})
+
+
 	r.POST("/register", func(c *gin.Context) {
 		var requestBody LoginRequestBody
 		err := c.BindJSON(&requestBody)
@@ -76,6 +93,18 @@ func main() {
 			db.Table("users").Create(&User { Username: requestBody.Username, Password: string(bytes) })
 			c.JSON(200, "Success")
 		}
+	})
+
+	r.POST("/add-note", func(c *gin.Context) {
+		var requestBody NoteRequestBody
+		err := c.BindJSON(&requestBody)
+		if err != nil {
+			fmt.Println("Something went wrong")
+		}
+
+		db.Table("users").Where("username = ?", requestBody.User).First(&user)
+		db.Table("notes").Create(&Note { Title: requestBody.Title, Description: requestBody.Description, OwnerID: user.ID })
+		c.JSON(200, "Success")
 	})
 	r.Run("127.0.0.1:3001")
 	
